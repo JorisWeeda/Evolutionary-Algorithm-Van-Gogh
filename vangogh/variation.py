@@ -11,8 +11,24 @@ def crossover(genes, method="ONE_POINT"):
 
         for i in range(len(genes)):
             offspring[i,:] = np.where(np.arange(genes.shape[1]) <= crossover_points[i], parents_1[i,:], parents_2[i,:])
+    
+
+    elif method == "RANDOM_UNIFORM":
+        l = len(parents_1)
+        offspring = np.zeros(shape=genes.shape, dtype=int)
+        
+        # Your code here
+        rng = np.random.default_rng()
+        for i in range(l):
+            r = rng.random()
+            if (r < p):
+                offspring[i,:] = parents_1[i,:]
+                
+            else:
+                offspring[i,:] = parents_2[i,:]
     else:
         raise Exception("Unknown crossover method")
+                
 
     return offspring
 
