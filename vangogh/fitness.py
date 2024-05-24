@@ -55,8 +55,9 @@ def compute_difference(genotype, reference_image: Image):
     diff = image_diff(Image.fromarray(actual, 'RGB'), expected)
     return diff
 
-
 def worker(args):
+    global QUERY_POINTS
+    QUERY_POINTS = args[2]
     return compute_difference(args[0], args[1])
 
 
@@ -65,5 +66,5 @@ def drawing_fitness_function(genes, reference_image: Image):
         QUERY_POINTS.extend([(x, y) for x in range(reference_image.width) for y in range(reference_image.height)])
 
     with Pool(min(max(cpu_count() - 1, 1), 4)) as p:
-        fitness_values = list(p.map(worker, zip(genes, [reference_image] * genes.shape[0])))
+        fitness_values = list(p.map(worker, zip(genes, [reference_image] * genes.shape[0], [QUERY_POINTS] * genes.shape[0])))
     return np.array(fitness_values)
