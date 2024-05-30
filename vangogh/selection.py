@@ -7,8 +7,10 @@ def select(population, selection_size, selection_name='tournament_4'):
     if 'tournament' in selection_name:
         tournament_size = int(selection_name.split('_')[-1])
         return tournament_select(population, selection_size, tournament_size)
+    
     elif 'roulette_wheel_selection' in selection_name:
-        roulette_wheel_selection(population)
+        return roulette_wheel_selection(population, selection_size)
+    
     else:
         raise ValueError('Invalid selection name:', selection_name)
 
@@ -49,13 +51,14 @@ def tournament_select(population, selection_size, tournament_size=4):
 
     return selected
 
-def roulette_wheel_selection(population):
+def roulette_wheel_selection(population, selection_size):
+    genotype_length = population.genes.shape[1]
+    selected = Population(selection_size, genotype_length, "N/A")
+
     fitness = population.fitnesses
     total_fitness = np.sum(fitness)
-    selected_individuals = []
 
-
-    for i in range(len(population.fitnesses)):
+    for i in range(selection_size):
         random_number = np.random.randint(low=0, high=total_fitness) # Might be an issue here!
         iSum = 0
         j = 0
@@ -63,10 +66,11 @@ def roulette_wheel_selection(population):
         while iSum < random_number and j < len(population.fitnesses):
             iSum += population.fitnesses[i]
             j += 1
-        
-        selected_individuals.append(population[j-1])
-    
-    return selected_individuals
+
+        selected.genes[i] = population.genes[j-1]
+        selected.fitnesses[i] = population.fitnesses[j-1]
+
+    return selected
 
 
 def stochastic_universalsampling(population):
