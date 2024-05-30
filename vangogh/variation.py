@@ -8,9 +8,28 @@ def crossover(genes, method="ONE_POINT"):
     if method == "ONE_POINT":
         crossover_points = np.random.randint(0, genes.shape[1], size=genes.shape[0])
         offspring = np.zeros(shape=genes.shape, dtype=int)
-
         for i in range(len(genes)):
             offspring[i,:] = np.where(np.arange(genes.shape[1]) <= crossover_points[i], parents_1[i,:], parents_2[i,:])
+
+    elif method == "TWO_POINT":
+        crossover_points = np.sort(np.random.choice(genes.shape[1], size=(genes.shape[0], 2), replace=False))
+        offspring = np.zeros(shape=genes.shape, dtype=int)
+        for i in range(len(genes)):
+            start, end = crossover_points[i]
+            offspring[i, start:end] = parents_1[i, start:end]
+            offspring[i, :start] = parents_2[i, :start]
+            offspring[i, end:] = parents_2[i, end:]
+
+    elif method == "UNIFORM":
+        crossover_points = np.random.uniform(0, 1, size=genes.shape).round().astype(int)
+        offspring = np.zeros(shape=genes.shape, dtype=int)
+        for i in range(len(genes)):
+            for j in range(genes.shape[1]):
+                if crossover_points[i, j] == 1:
+                    offspring[i, j] = parents_1[i, j]
+                else:
+                    offspring[i, j] = parents_2[i, j]
+
     else:
         raise Exception("Unknown crossover method")
 
