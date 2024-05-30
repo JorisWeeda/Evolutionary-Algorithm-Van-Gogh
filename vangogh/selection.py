@@ -7,6 +7,8 @@ def select(population, selection_size, selection_name='tournament_4'):
     if 'tournament' in selection_name:
         tournament_size = int(selection_name.split('_')[-1])
         return tournament_select(population, selection_size, tournament_size)
+    elif 'roulette_wheel_selection' in selection_name:
+        roulette_wheel_selection(population)
     else:
         raise ValueError('Invalid selection name:', selection_name)
 
@@ -46,3 +48,36 @@ def tournament_select(population, selection_size, tournament_size=4):
         population.fitnesses[winning_indices]
 
     return selected
+
+def roulette_wheel_selection(population):
+    fitness = population.fitnesses
+    total_fitness = np.sum(fitness)
+    selected_individuals = []
+
+
+    for i in range(len(population.fitnesses)):
+        random_number = np.random.randint(low=0, high=total_fitness) # Might be an issue here!
+        iSum = 0
+        j = 0
+
+        while iSum < random_number and j < len(population.fitnesses):
+            iSum += population.fitnesses[i]
+            j += 1
+        
+        selected_individuals.append(population[j-1])
+    
+    return selected_individuals
+
+
+def stochastic_universalsampling(population):
+    pass
+
+def linear_rank_selection(population):
+    pass
+
+def exponential_rank_selection(population):
+    pass
+
+def truncation_selection(population):
+    pass
+
