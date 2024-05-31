@@ -21,7 +21,7 @@ def crossover(genes, method="ONE_POINT"):
         rng = np.random.default_rng()
         for i in range(l):
             r = rng.random()
-            if (r < p):
+            if (r < 0.5):
                 offspring[i,:] = parents_1[i,:]
                 
             else:
