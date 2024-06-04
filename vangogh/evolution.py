@@ -1,4 +1,5 @@
 import time
+import copy
 
 import numpy as np
 from PIL import Image
@@ -8,6 +9,8 @@ from vangogh import selection, variation
 from vangogh.fitness import drawing_fitness_function, draw_voronoi_image
 from vangogh.population import Population
 from vangogh.util import NUM_VARIABLES_PER_POINT, IMAGE_SHRINK_SCALE, REFERENCE_IMAGE
+
+from vangogh.rbf import RBFN
 
 
 class Evolution:
@@ -90,6 +93,12 @@ class Evolution:
             num_unmutable_features = 0
             self.mutation_probability = 1 / (self.genotype_length - num_unmutable_features)
 
+        # setup rbfn crossover
+        self.rbfn = RBFN(self.genotype_length, self.genotype_length, self.genotype_length)
+        self.rbfn_loss = None
+        self.train_set = []
+        self._max_size = 10
+
             # incompatibilities
         if self.evolution_type == 'p+o' and self.noisy_evaluations:
             raise ValueError(
@@ -110,17 +119,45 @@ class Evolution:
         offspring = Population(self.population_size, self.genotype_length, self.initialization)
         offspring.genes[:] = self.population.genes[:]
         offspring.shuffle()
+
+        # Calculate parent fitness for later use
+        parents_fitnesses = drawing_fitness_function(self.population.genes, self.reference_image)
+        parent_genes = copy.deepcopy(offspring.genes)
+
         # variation
-        offspring.genes = variation.crossover(offspring.genes, self.crossover_method)
+        offspring.genes, _ = variation.crossover(offspring.genes, self.crossover_method, rbfn=self.rbfn)
         offspring.genes = variation.mutate(offspring.genes, self.feature_intervals,
                                            mutation_probability=self.mutation_probability,
                                            num_features_mutation_strength=self.num_features_mutation_strength)
+
         # evaluate offspring
-        offspring.fitnesses = drawing_fitness_function(offspring.genes,
-                                                       self.reference_image)
+        offspring.fitnesses = drawing_fitness_function(offspring.genes, self.reference_image)
         self.num_evaluations += len(offspring.genes)
 
         self.__update_elite(offspring)
+
+        # train the rbf network to improve crossover
+        if self.crossover_method == "RBFNX":
+            uniformx_genes, uniformx_crossover = variation.crossover(parent_genes, "UNIFORM", rbfn=self.rbfn)
+            uniformx_fitness = drawing_fitness_function(uniformx_genes, self.reference_image)
+
+            parents_a = np.array(parent_genes[:len(parent_genes) // 2])
+            parents_b = np.array(parent_genes[len(parent_genes) // 2:])
+
+            parents_a_fitnesses = np.array(parents_fitnesses[:len(parents_fitnesses) // 2])
+            parents_b_fitnesses = np.array(parents_fitnesses[len(parents_fitnesses) // 2:])
+
+            for i in range(len(parents_a)):
+                if uniformx_fitness[i] < parents_a_fitnesses[i] and uniformx_fitness[i] < parents_b_fitnesses[i]:
+                    self.train_set.append([parents_a[i], parents_b[i], uniformx_crossover[i]])
+
+            if len(self.train_set) % self._max_size == 0:
+                parents_a, parents_b, uniformx_crossover = zip(*self.train_set)
+
+                parents_a, parents_b = np.array(parents_a), np.array(parents_b)
+                uniformx_crossover = np.array(uniformx_crossover)
+
+                self.rbfn_loss = self.rbfn.train_rbf(parents_a, parents_b, uniformx_crossover)
 
         # selection
         if merge_parent_offspring:
@@ -175,8 +212,10 @@ class Evolution:
                          "time-elapsed": time.time() - start_time_seconds,
                          "best-fitness": self.elite_fitness,
                          "crossover-method": self.crossover_method,
-                         "population-size": self.population_size, "num-points": self.num_points,
+                         "population-size": self.population_size, 
+                         "num-points": self.num_points,
                          "initialization": self.initialization,
+                         "rbfn-loss": self.rbfn_loss,
                          "seed": self.seed})
             if self.generation_reporter is not None:
                 self.generation_reporter(
