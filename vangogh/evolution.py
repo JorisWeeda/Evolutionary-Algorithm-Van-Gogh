@@ -30,6 +30,9 @@ class Evolution:
                  generation_reporter=None,
                  seed=0):
 
+        # ADD generation counter!!!
+        self.curr_gen = 0
+
         self.reference_image: Image = reference_image.copy()
         self.reference_image.thumbnail((int(self.reference_image.width / IMAGE_SHRINK_SCALE),
                                         int(self.reference_image.height / IMAGE_SHRINK_SCALE)),
@@ -130,7 +133,7 @@ class Evolution:
             # just replace the entire thing
             self.population = offspring
 
-        self.population = selection.select(self.population, self.population_size,
+        self.population = selection.select(self.population, self.population_size, self.curr_gen,
                                            selection_name=self.selection_name)
 
     def run(self):
@@ -166,6 +169,8 @@ class Evolution:
 
             # generation terminated
             i_gen += 1
+            self.curr_gen = i_gen
+
             if self.verbose:
                 print('generation:', i_gen, 'best fitness:', self.elite_fitness, 'avg. fitness:',
                       np.mean(self.population.fitnesses))
