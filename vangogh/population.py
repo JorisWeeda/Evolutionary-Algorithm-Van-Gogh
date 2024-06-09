@@ -43,10 +43,9 @@ class Population:
             # Sort cells by gradient
             gradients.sort(reverse=True, key=lambda x: x[0])
             top_25_percent_index = int(0.25 * len(gradients))
-            bottom_75_percent_index = len(gradients) - top_25_percent_index
 
             top_cells = gradients[:top_25_percent_index]
-            bottom_cells = gradients[top_25_percent_index:bottom_75_percent_index]
+            bottom_cells = gradients[top_25_percent_index:]
 
             # Allocate points based on gradient
             num_top_points = int(0.75 * n)
@@ -68,8 +67,12 @@ class Population:
                 points.append((x, y))
 
             points = np.array(points)
-            self.genes[:, 0] = points[:, 0]
-            self.genes[:, 1] = points[:, 1]
+            self.genes[:, 0:2] = points
+
+            for i in range(2, l):
+                init_feat_i = np.random.randint(low=feature_intervals[i][0],
+                                                high=feature_intervals[i][1], size=n)
+                self.genes[:, i] = init_feat_i
 
         elif self.initialization == "RANDOM":
             for i in range(l):
@@ -83,7 +86,7 @@ class Population:
             raise Exception("Unknown initialization method")
 
         return points
-    
+
     def stack(self, other):
         self.genes = np.vstack((self.genes, other.genes))
         self.fitnesses = np.concatenate((self.fitnesses, other.fitnesses))
@@ -99,6 +102,7 @@ class Population:
     def delete(self, indices):
         self.genes = np.delete(self.genes, indices, axis=0)
         self.fitnesses = np.delete(self.fitnesses, indices)
+
 
 def plot_initialization_points(reference_image, random_points, random_gradient_points):
     print("Plotting the points...")
@@ -123,6 +127,8 @@ def plot_initialization_points(reference_image, random_points, random_gradient_p
 
     plt.show()
     print("Plotting complete.")
+
+
 
 # Example usage
 population_size = 100
