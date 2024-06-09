@@ -27,7 +27,7 @@ def one_tournament_round(population, tournament_size, return_winner_index=False)
 def tournament_select(population, selection_size, tournament_size=4):
     genotype_length = population.genes.shape[1]
     selected = Population(selection_size, genotype_length, "N/A")
-
+    
     n = len(population.fitnesses)
     num_selected_per_iteration = n // tournament_size
     num_parses = selection_size // num_selected_per_iteration

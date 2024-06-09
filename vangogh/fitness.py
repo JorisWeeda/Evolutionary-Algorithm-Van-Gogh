@@ -16,7 +16,7 @@ def draw_voronoi_matrix(genotype, img_width, img_height, scale=1):
     num_points = int(len(genotype) / NUM_VARIABLES_PER_POINT)
     coords = []
     colors = []
-
+    
     for r in range(num_points):
         p = r * NUM_VARIABLES_PER_POINT
         x, y, r, g, b = genotype[p:p + NUM_VARIABLES_PER_POINT]
@@ -43,6 +43,7 @@ def draw_voronoi_matrix(genotype, img_width, img_height, scale=1):
 
 
 def draw_voronoi_image(genotype, img_width, img_height, scale=1) -> Image:
+    
     data = draw_voronoi_matrix(genotype, img_width, img_height, scale)
     img = Image.fromarray(data, 'RGB')
     return img
