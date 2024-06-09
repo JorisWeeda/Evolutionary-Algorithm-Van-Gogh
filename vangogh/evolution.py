@@ -32,6 +32,7 @@ class Evolution:
 
         # ADD generation counter!!!
         self.curr_gen = 0
+        self.selection_method = selection_name
 
         self.reference_image: Image = reference_image.copy()
         self.reference_image.thumbnail((int(self.reference_image.width / IMAGE_SHRINK_SCALE),
@@ -182,7 +183,8 @@ class Evolution:
                          "crossover-method": self.crossover_method,
                          "population-size": self.population_size, "num-points": self.num_points,
                          "initialization": self.initialization,
-                         "seed": self.seed})
+                         "seed": self.seed,
+                         "selection-method": self.selection_method})
             if self.generation_reporter is not None:
                 self.generation_reporter(
                     {"num-generations": i_gen, "num-evaluations": self.num_evaluations,
@@ -200,7 +202,7 @@ class Evolution:
         draw_voronoi_image(self.elite, self.reference_image.width, self.reference_image.height,
                            scale=IMAGE_SHRINK_SCALE) \
             .save(
-            f"./img/van_gogh_final_{self.seed}_{self.population_size}_{self.crossover_method}_{self.num_points}_{self.initialization}_{self.generation_budget}.png")
+            f"./img/van_gogh_final_{self.seed}_{self.population_size}_{self.crossover_method}_{self.num_points}_{self.initialization}_{self.generation_budget}_{self.selection_method}.png")
         return data
 
 

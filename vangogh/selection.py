@@ -3,7 +3,7 @@ import numpy as np
 from vangogh.population import Population
 
 
-def select(population, selection_size, generation, selection_name='tournament_4'):
+def select(population, selection_size, generation, selection_name):
     if 'tournament' in selection_name:
         tournament_size = int(selection_name.split('_')[-1])
         return tournament_select(population, selection_size, tournament_size)
@@ -193,11 +193,11 @@ def calculate_combined_criterion(diversity, quality, generation):
 
 
 def run_optimization(population, selection_size, generation, selection_name="linear_rank_selection"):
-    selection_methods = ["linear_rank_selection", "stochastic_universal_sampling", "tournament_4"]
+    selection_methods = ["tournament_4", "stochastic_universal_sampling", "roulette_wheel_selection"]
     compare_methods = []
 
     for methods in selection_methods:
-        selected_population = select(population, selection_size, methods)
+        selected_population = select(population, selection_size, generation, methods)
     
         # Calculate statistics
         diversity = calculate_diversity(selected_population, generation, max_distance=100)  # Adjust max_distance as needed
