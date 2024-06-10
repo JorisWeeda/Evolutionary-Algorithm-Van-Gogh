@@ -27,6 +27,7 @@ class Evolution:
                  initialization='RANDOM',
                  noisy_evaluations=False,
                  verbose=False,
+                 ref_image_name="wheat_field",
                  generation_reporter=None,
                  seed=0):
 
@@ -67,6 +68,7 @@ class Evolution:
         self.crossover_method = crossover_method
         self.num_evaluations = 0
         self.initialization = initialization
+        self.ref_image_name = ref_image_name
 
         np.random.seed(seed)
         self.seed = seed
@@ -184,7 +186,9 @@ class Evolution:
                          "population-size": self.population_size, "num-points": self.num_points,
                          "initialization": self.initialization,
                          "seed": self.seed,
-                         "selection-method": self.selection_method})
+                         "selection-method": self.selection_method,
+                         "ref_image_name" : self.ref_image_name})
+            
             if self.generation_reporter is not None:
                 self.generation_reporter(
                     {"num-generations": i_gen, "num-evaluations": self.num_evaluations,
@@ -202,7 +206,7 @@ class Evolution:
         draw_voronoi_image(self.elite, self.reference_image.width, self.reference_image.height,
                            scale=IMAGE_SHRINK_SCALE) \
             .save(
-            f"./img/van_gogh_final_{self.seed}_{self.population_size}_{self.crossover_method}_{self.num_points}_{self.initialization}_{self.generation_budget}_{self.selection_method}.png")
+            f"./img/van_gogh_final_{self.seed}_{self.ref_image_name}_{self.population_size}_{self.crossover_method}_{self.num_points}_{self.initialization}_{self.generation_budget}_{self.selection_method}.png")
         return data
 
 
@@ -219,5 +223,6 @@ if __name__ == '__main__':
                     num_features_mutation_strength_decay_generations=None,
                     selection_name='tournament_4',
                     noisy_evaluations=False,
-                    verbose=True)
+                    verbose=True,
+                    ref_image_name='wheat_field',)
     evo.run()
