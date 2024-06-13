@@ -19,8 +19,8 @@ class Population:
             image_array = np.array(gray_image)
 
             # Define the size of the cells
-            cell_size_x = 20
-            cell_size_y = 20
+            cell_size_x = 40
+            cell_size_y = 40
 
             # Calculate the number of cells
             num_cells_x = image_array.shape[1] // cell_size_x
@@ -68,6 +68,7 @@ class Population:
 
             points = np.array(points)
             self.genes[:, 0:2] = points
+            print(points)
 
             for i in range(2, l):
                 init_feat_i = np.random.randint(low=feature_intervals[i][0],
@@ -119,7 +120,7 @@ def plot_initialization_points(reference_image, random_points, random_gradient_p
 
     plt.subplot(1, 2, 2)
     plt.imshow(reference_image)
-    plt.scatter(random_gradient_points[:, 0], random_gradient_points[:, 1], color='blue', s=1)
+    plt.scatter(random_gradient_points[:, 0], random_gradient_points[:, 1], color='red', s=1)
     plt.xlim(0, reference_image.width)
     plt.ylim(0, reference_image.height)
     plt.gca().invert_yaxis()
