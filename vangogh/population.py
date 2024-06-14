@@ -82,12 +82,12 @@ class Population:
                 init_feat_i = np.random.randint(low=feature_intervals[i][0],
                                                 high=feature_intervals[i][1], size=n)
                 self.genes[:, i] = init_feat_i
+            print("RANDOM GRADIENT")
+            print("len: ", self.genes.shape)
+            print("len tot: ", len(self.genes[0]))       
 
-        
-        elif self.initialization == "FULL_SAMPLE":
-            max_colors = 100000
-            imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
-            colors = [color for count, color in imgcolors]
+        elif self.initialization == "HYBRID":
+            # Convert the reference image to grayscale for gradient calculation
             gray_image = REFERENCE_IMAGE.convert("L")
             image_array = np.array(gray_image)
 
@@ -130,45 +130,39 @@ class Population:
             points = []
             for idx in top_cells_points:
                 i, j = top_cells[idx][1]
-                cell = image_array[j*cell_size_y:(j+1)*cell_size_y, i*cell_size_x:(i+1)*cell_size_x]
-                y, x = np.unravel_index(np.argmax(cell, axis=None), cell.shape)
-                x += i * cell_size_x
-                y += j * cell_size_y
+                x = np.random.randint(i*cell_size_x, (i+1)*cell_size_x)
+                y = np.random.randint(j*cell_size_y, (j+1)*cell_size_y)
                 points.append((x, y))
             
             for idx in bottom_cells_points:
                 i, j = bottom_cells[idx][1]
-                cell = image_array[j*cell_size_y:(j+1)*cell_size_y, i*cell_size_x:(i+1)*cell_size_x]
-                y, x = np.unravel_index(np.argmax(cell, axis=None), cell.shape)
-                x += i * cell_size_x
-                y += j * cell_size_y
+                x = np.random.randint(i*cell_size_x, (i+1)*cell_size_x)
+                y = np.random.randint(j*cell_size_y, (j+1)*cell_size_y)
                 points.append((x, y))
 
             points = np.array(points)
-            self.genes[:, 0:2] = points
-            col = np.zeros((n,l-2))
-            for j in range(0, l-2, 3):
-            
-                #init_feat_i = np.random.choice(colors, size=n)
-                #self.genes[:, i] = init_feat_i
-                
-                
-                for i in range(n):
-                    sampled_indices = np.random.choice(len(colors))
-                    # Use the sampled indices to get the actual colors
-                    r, g, b = colors[sampled_indices]
-                    
-                    col[i,j] =  r
-                    col[i,j+1] =  g
-                    col[i,j+2] =  b
-                
-            self.genes[:, 2:] = col
 
-            print("FULL SAMPLE")
+            # Sample the r, g, b colors
+            max_colors = 100000
+            imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
+            colors = [color for count, color in imgcolors]
+
+            self.genes = np.zeros((n, l))
+            self.genes[:, 0:2] = points
+
+            for i in range(n):
+                col = np.array([])
+                for j in range(int((l - 2) / 3)):
+                    sampled_indices = np.random.choice(len(colors))
+                    r, g, b = colors[sampled_indices]
+                    col = np.append(col, [r, g, b])
+                self.genes[i, 2:] = col
+
+            print("HYBRID INITIALIZATION")
             print("len: ", self.genes.shape)
             print("len tot: ", len(self.genes[0]))
-            
-        elif self.initialization == "PSEUDORANDOM":
+
+        elif self.initialization == "COLOR_SAMPLE_DISTRIBUTION":
             max_colors = 100000
             imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
             colors = [color for count, color in imgcolors]
@@ -180,6 +174,30 @@ class Population:
                 
                 for j in range(int(l/5)):
                     sampled_indices = np.random.choice(len(colors))
+                    # Use the sampled indices to get the actual colors
+                    r, g, b = colors[sampled_indices]
+                    x,y = np.random.randint(low=feature_intervals[j][0],
+                                                            high=feature_intervals[j][1], size=2)
+                    col = np.append(col, [x,y,r,g,b])
+                
+                self.genes[i, :] = col
+            print("PSEUDO")
+            print("len: ", self.genes.shape)
+            print("len tot: ", len(self.genes[0]))
+        elif self.initialization == "COLOR_SAMPLE":
+            max_colors = 100000
+            imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
+            colors = [color for count, color in imgcolors]
+            count = [count for count, color in imgcolors]
+            norm_count = [element / sum(count) for element in count]
+            #print(len(colors[0]))
+            for i in range(n):
+                #init_feat_i = np.random.choice(colors, size=n)
+                #self.genes[:, i] = init_feat_i
+                col = np.array([])
+                
+                for j in range(int(l/5)):
+                    sampled_indices = np.random.choice(len(colors), p = norm_count)
                     # Use the sampled indices to get the actual colors
                     r, g, b = colors[sampled_indices]
                     x,y = np.random.randint(low=feature_intervals[j][0],
