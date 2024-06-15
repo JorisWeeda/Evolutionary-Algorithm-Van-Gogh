@@ -10,8 +10,6 @@ class Population:
     def initialize(self, feature_intervals):
         n = self.genes.shape[0]
         l = self.genes.shape[1]
-        print("l:", l)
-        print("n:", n)
         points = []
 
         if self.initialization == "RANDOM":
@@ -19,9 +17,7 @@ class Population:
                 init_feat_i = np.random.randint(low=feature_intervals[i][0],
                                                         high=feature_intervals[i][1], size=n)
                 self.genes[:, i] = init_feat_i
-            print("RANDOM")
-            print("len: ", self.genes.shape)
-            print("len tot: ", len(self.genes[0]))
+
 
         elif self.initialization == "RANDOM_GRADIENT":
             gray_image = REFERENCE_IMAGE.convert("L")
@@ -82,94 +78,15 @@ class Population:
                 init_feat_i = np.random.randint(low=feature_intervals[i][0],
                                                 high=feature_intervals[i][1], size=n)
                 self.genes[:, i] = init_feat_i
-            print("RANDOM GRADIENT")
-            print("len: ", self.genes.shape)
-            print("len tot: ", len(self.genes[0]))       
-
-        elif self.initialization == "HYBRID":
-            # Convert the reference image to grayscale for gradient calculation
-            gray_image = REFERENCE_IMAGE.convert("L")
-            image_array = np.array(gray_image)
-
-            # Define the size of the cells
-            cell_size_x = 20
-            cell_size_y = 20
-
-            # Calculate the number of cells
-            num_cells_x = image_array.shape[1] // cell_size_x
-            num_cells_y = image_array.shape[0] // cell_size_y
-
-            # Function to calculate the gradient of an image cell
-            def calculate_gradients(cell):
-                gy, gx = np.gradient(cell)
-                magnitude = np.sqrt(gx**2 + gy**2)
-                return np.mean(magnitude)
-
-            # Calculate the average gradients for each cell
-            gradients = []
-            for i in range(num_cells_x):
-                for j in range(num_cells_y):
-                    cell = image_array[j*cell_size_y:(j+1)*cell_size_y, i*cell_size_x:(i+1)*cell_size_x]
-                    avg_gradient = calculate_gradients(cell)
-                    gradients.append((avg_gradient, (i, j)))
-
-            # Sort cells by gradient
-            gradients.sort(reverse=True, key=lambda x: x[0])
-            top_25_percent_index = int(0.25 * len(gradients))
-
-            top_cells = gradients[:top_25_percent_index]
-            bottom_cells = gradients[top_25_percent_index:]
-
-            # Allocate points based on gradient
-            num_top_points = int(0.75 * n)
-            num_bottom_points = n - num_top_points
-
-            top_cells_points = np.random.choice(len(top_cells), num_top_points, replace=True)
-            bottom_cells_points = np.random.choice(len(bottom_cells), num_bottom_points, replace=True)
-
-            points = []
-            for idx in top_cells_points:
-                i, j = top_cells[idx][1]
-                x = np.random.randint(i*cell_size_x, (i+1)*cell_size_x)
-                y = np.random.randint(j*cell_size_y, (j+1)*cell_size_y)
-                points.append((x, y))
-            
-            for idx in bottom_cells_points:
-                i, j = bottom_cells[idx][1]
-                x = np.random.randint(i*cell_size_x, (i+1)*cell_size_x)
-                y = np.random.randint(j*cell_size_y, (j+1)*cell_size_y)
-                points.append((x, y))
-
-            points = np.array(points)
-
-            # Sample the r, g, b colors
-            max_colors = 100000
-            imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
-            colors = [color for count, color in imgcolors]
-
-            self.genes = np.zeros((n, l))
-            self.genes[:, 0:2] = points
-
-            for i in range(n):
-                col = np.array([])
-                for j in range(int((l - 2) / 3)):
-                    sampled_indices = np.random.choice(len(colors))
-                    r, g, b = colors[sampled_indices]
-                    col = np.append(col, [r, g, b])
-                self.genes[i, 2:] = col
-
-            print("HYBRID INITIALIZATION")
-            print("len: ", self.genes.shape)
-            print("len tot: ", len(self.genes[0]))
 
         elif self.initialization == "COLOR_SAMPLE_DISTRIBUTION":
+            #fetch colors
             max_colors = 100000
             imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
             colors = [color for count, color in imgcolors]
-            #print(len(colors[0]))
+            #loop through population and fill genes
             for i in range(n):
-                #init_feat_i = np.random.choice(colors, size=n)
-                #self.genes[:, i] = init_feat_i
+                
                 col = np.array([])
                 
                 for j in range(int(l/5)):
@@ -181,19 +98,17 @@ class Population:
                     col = np.append(col, [x,y,r,g,b])
                 
                 self.genes[i, :] = col
-            print("PSEUDO")
-            print("len: ", self.genes.shape)
-            print("len tot: ", len(self.genes[0]))
+
         elif self.initialization == "COLOR_SAMPLE":
+            #fetch colors, count and normalize
             max_colors = 100000
             imgcolors = REFERENCE_IMAGE.getcolors(max_colors)
             colors = [color for count, color in imgcolors]
             count = [count for count, color in imgcolors]
             norm_count = [element / sum(count) for element in count]
-            #print(len(colors[0]))
+            #loop through population and fill genes
             for i in range(n):
-                #init_feat_i = np.random.choice(colors, size=n)
-                #self.genes[:, i] = init_feat_i
+                
                 col = np.array([])
                 
                 for j in range(int(l/5)):
@@ -205,9 +120,7 @@ class Population:
                     col = np.append(col, [x,y,r,g,b])
                 
                 self.genes[i, :] = col
-            print("PSEUDO")
-            print("len: ", self.genes.shape)
-            print("len tot: ", len(self.genes[0]))
+            
         else:
             raise Exception("Unknown initialization method")
         return points
