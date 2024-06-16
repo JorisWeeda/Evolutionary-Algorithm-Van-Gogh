@@ -97,7 +97,7 @@ class Evolution:
         self.rbfn = RBFN(self.genotype_length, self.genotype_length, self.genotype_length)
         self.rbfn_loss = None
         self.train_set = []
-        self._max_size = 10
+        self._max_size = 100
 
             # incompatibilities
         if self.evolution_type == 'p+o' and self.noisy_evaluations:
@@ -115,22 +115,18 @@ class Evolution:
             self.elite_fitness = best_fitness
 
     def __classic_generation(self, merge_parent_offspring=False):
-        # create offspring population
         offspring = Population(self.population_size, self.genotype_length, self.initialization)
         offspring.genes[:] = self.population.genes[:]
         offspring.shuffle()
 
-        # Calculate parent fitness for later use
         parents_fitnesses = drawing_fitness_function(self.population.genes, self.reference_image)
         parent_genes = copy.deepcopy(offspring.genes)
 
-        # variation
         offspring.genes, _ = variation.crossover(offspring.genes, self.crossover_method, rbfn=self.rbfn)
         offspring.genes = variation.mutate(offspring.genes, self.feature_intervals,
                                            mutation_probability=self.mutation_probability,
                                            num_features_mutation_strength=self.num_features_mutation_strength)
 
-        # evaluate offspring
         offspring.fitnesses = drawing_fitness_function(offspring.genes, self.reference_image)
         self.num_evaluations += len(offspring.genes)
 

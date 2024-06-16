@@ -5,7 +5,7 @@ import numpy as np
 
 
 def gaussian(alpha):
-    phi = torch.exp(-1 * alpha.pow(2))
+    phi = torch.exp(-1*alpha.pow(2))
     return phi
 
 
@@ -39,9 +39,10 @@ class RBFN(nn.Module):
 
         self.rbf_layer = RBF(input_dim, num_centers)
         self.linear_layer = nn.Linear(num_centers, output_dim)
+        self.sigmoid = nn.Sigmoid()
 
         self.optimizer = optim.Adam(self.parameters(), lr=0.001)
-        self.loss_func = nn.BCEWithLogitsLoss()
+        self.loss_func = nn.BCELoss()
 
     def forward(self, x_a, x_b):
         x_a_T = torch.FloatTensor(x_a)
@@ -51,19 +52,22 @@ class RBFN(nn.Module):
 
         y = self.rbf_layer(u)
         y = self.linear_layer(y)
+        y = self.sigmoid(y)
         return y
 
-    def train_rbf(self, x_a, x_b, desired_output, epochs=1, batch_size=32):
+    def train_rbf(self, x_a, x_b, desired_output, epochs=10, batch_size=32):
         dataset = torch.utils.data.TensorDataset(torch.FloatTensor(x_a), torch.FloatTensor(x_b), torch.FloatTensor(desired_output))
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
         for _ in range(epochs):
             self.train()
+            
             total_loss = 0
             for batch_x_a, batch_x_b, batch_y in dataloader:
                 self.optimizer.zero_grad()
 
                 p = self.forward(batch_x_a, batch_x_b)
+
                 loss = self.loss_func(p, batch_y)
                 loss.backward()
                 self.optimizer.step()
@@ -79,21 +83,19 @@ class RBFN(nn.Module):
         min_val = torch.min(x, dim=0, keepdim=True)[0]
         max_val = torch.max(x, dim=0, keepdim=True)[0]
         range_val = max_val - min_val
-        range_val[range_val == 0] = 1  # Avoid division by zero
+        range_val[range_val == 0] = 1
         return -1 + 2 * (x - min_val) / range_val
 
-# Example usage
+
 if __name__ == "__main__":
     input_dim = 500
-    num_centers = 500  # Adjust this based on your needs
+    num_centers = 500
     output_dim = 500
 
     model = RBFN(input_dim, num_centers, output_dim)
 
-    # Create some dummy data
-    x_a = np.random.rand(100, input_dim)  # 100 samples, each of dimension 500
-    x_b = np.random.rand(100, input_dim)  # Another set of 100 samples, each of dimension 500
-    y = np.random.randint(0, 2, (100, output_dim))  # Example: binary output with 0 or 1
+    x_a = np.random.rand(100, input_dim)
+    x_b = np.random.rand(100, input_dim)
+    y = np.random.randint(0, 2, (100, output_dim))
 
-    # Train the model
     model.train_rbf(x_a, x_b, y, epochs=100, batch_size=32)

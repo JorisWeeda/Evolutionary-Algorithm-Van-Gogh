@@ -1,4 +1,5 @@
 import torch
+import random
 
 import numpy as np
 
@@ -41,7 +42,8 @@ def crossover(genes, method="ONE_POINT", rbfn=None):
         y = rbfn.forward(parents_1, parents_2)
         y_np = y.detach().numpy()
 
-        mask = np.where(y_np < 0.5, 1, 0)
+        r_values = np.random.uniform(0, 1, size=y_np.shape)
+        mask = np.where(y_np < r_values, 0, 1)
 
         offspring = np.where(mask == 1, parents_1, parents_2)
         crossover = mask
