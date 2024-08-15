@@ -43,22 +43,22 @@ To improve variation more effectively, we explore a learning-based approach usin
 
 **Hypothesis:** We expect that a learning-based approach would identify the individual blocks consisting of a coordinate and a color, leading to improved crossover performance compared to *1PX*, *2PX*, and *UX*.
 
-![RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask \( \textbf{m} \in \mathbb{B}^N \) is created using the outputs of the RBFN.](./res/img_RBFN_crossover_network.png)  
-**Figure 3:** RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask \( \textbf{m} \in \mathbb{B}^N \) is created using the outputs of the RBFN.
+![RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask $ \textbf{m} \in \mathbb{B}^N $ is created using the outputs of the RBFN.](./res/img_RBFN_crossover_network.png)  
+**Figure 3:** RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask $ \textbf{m} \in \mathbb{B}^N $ is created using the outputs of the RBFN.
 
 Building upon the work presented by [TINOS2020106512](#TINOS2020106512), we design an artificial neural network to compute the recombination mask for two parents. Specifically, a radial basis function network (RBFN) is trained online using past successful recombination cases during the optimization process performed by the evolutionary algorithm.
 
-The RBFN is used to create a recombination mask \( \textbf{m} \in \mathbb{B}^N \), where each element \( m_i \) of the mask is determined by the output of the RBFN. The RBFN uses radial basis functions to transform the input features into a new space where linear separation is possible. The placement of this network within crossover is illustrated in Figure 3. The parents serve as input to the RBFN, producing an output that is converted to a mask that can be applied to the parents again to produce offspring.
+The RBFN is used to create a recombination mask $ \textbf{m} \in \mathbb{B}^N $, where each element $ m_i $ of the mask is determined by the output of the RBFN. The RBFN uses radial basis functions to transform the input features into a new space where linear separation is possible. The placement of this network within crossover is illustrated in Figure 3. The parents serve as input to the RBFN, producing an output that is converted to a mask that can be applied to the parents again to produce offspring.
 
-For further clarification, let \( \textbf{x}^1, \textbf{x}^2 \in \mathbb{R}^N \) denote the genotypes of the two parents. The RBFN's input is a concatenated vector of these genotypes, normalized to the range [0, 1]:
+For further clarification, let $ \textbf{x}^1, \textbf{x}^2 \in \mathbb{R}^N $ denote the genotypes of the two parents. The RBFN's input is a concatenated vector of these genotypes, normalized to the range [0, 1]:
 
 $$
 \textbf{u} = \text{normalize}(\textbf{x}^1, \textbf{x}^2)
 $$
 
-The RBFN output \( \textbf{y} \in \mathbb{R}^N \)
+The RBFN output $ \textbf{y} \in \mathbb{R}^N $
 
- is then compared to a random threshold vector \( \textbf{r} \in [0,1]^N \) to generate the mask \( \textbf{m} \in \mathbb{B}^N \):
+ is then compared to a random threshold vector $ \textbf{r} \in [0,1]^N $ to generate the mask $ \textbf{m} \in \mathbb{B}^N $:
 
 $$
 m_i = \begin{cases} 
@@ -70,17 +70,37 @@ $$
 **Notes:** For more details, see [TINOS2020106512](#TINOS2020106512). The training subset includes successful recombination cases, and the training set is updated at each generation.
 
 ## Selection
-In this section, multiple selection methods are evaluated and compared each generation to determine the most effective method.
+The usually used selection method is tournament selection. This type of selection looks at the best fitness of the population used in a tournament. While this is the most used method, we want to explore the use of multiple selection methods and compare these methods each generation. Then we can select the best method for that generation and proceed to the next generation with this selection method.
 
-### Optimization Selection
-Based on [JebariSelection2013](#JebariSelection2013), combining multiple selection methods could perform better than a single method. We implemented roulette wheel selection (*RWS*), stochastic universal sampling (*SUS*), and tournament selection (*TOS*), and then compared them. 
+#### Optimization Selection
 
-### Tournament Selection
-Tournament selection is a commonly used selection method in genetic algorithms [Miller1995GeneticAT](#Miller1995GeneticAT). We used this method as a baseline for comparing other selection methods.
+The paper *Selection Methods for Genetic Algorithms* claims that a combination of multiple selection methods could outperform a single selection algorithm [Jebari, 2013](https://link.springer.com/article/10.1007/s10957-013-0307-2). We want to see if we could improve our fitness by implementing the multiple selection strategy. The selection strategies used are roulette wheel selection (RWS), stochastic universal sampling (SUS), and tournament selection (TOS). These methods will be benchmarked to see if the optimization method fits the problem better instead of these methods.
 
-**Hypothesis:** An algorithm that selects the best selection method per generation will perform better in terms of fitness compared to only using tournament selection.
+#### Tournament Selection
 
-We compared the performance of different selection methods based on average fitness, best fitness, diversity, and quality metrics.
+Tournament selection is a useful and robust selection method often used in genetic algorithms [Miller & Goldberg, 1995](https://dl.acm.org/doi/10.5555/645529.655679). We use tournament selection as a measure of how well our selection method works based on the average and best fitness of the final population.
+
+**Hypothesis:** We expect that when we use an algorithm to pick the best selection method per generation, the fitness will be better than when only tournament selection is used. By using optimization selection to select the best selection method of the given methods for each generation, we want to try to increase the diversity and fitness.
+
+To test the hypothesis, all the selection methods mentioned above have been benchmarked. The average fitness, best fitness, diversity, and quality are benchmarked. The diversity is calculated with equation (1) and the quality is calculated with equation (2).
+
+$$
+\text{Div}(t) = \frac{1}{G}\sum_{k=1}^{G}\left( \frac{1}{\text{max}(d_{ij}) \ln(n-1)}\sum_{i=1}^{n}\sum_{j \neq 1}^{n}d_{ij}(k,t) \right)
+$$
+
+"Where $d_{ij}$ is the Euclidean distance between the $i^{th}$ and $j^{th}$ individuals at generation $t$ of the $j^{th}$ run, $n$ is the population size, $\text{max}(d_{ij})$ is the maximum distance supposed between individuals of the population, and $t$ is the number of generations or iterations. As a measure of the quality of the solution at each generation, we used the criterion" [Miller & Goldberg, 1995](https://dl.acm.org/doi/10.5555/645529.655679).
+
+$$
+\text{Quality} = \frac{f^{*}}{\sqrt{f_{\text{max}}^{2} - f_{\text{min}}^{2}}}
+$$
+
+"Where $f_{\text{max}}$ and $f_{\text{min}}$ denote respectively the maximum and the minimum values of the fitness at generation $t$, and $f^{*}=f_{\text{max}}$ or $f^{*}=f_{\text{min}}$ depending on the nature of the problem, which can be either a maximization or a minimization problem." [Miller & Goldberg, 1995](https://dl.acm.org/doi/10.5555/645529.655679).
+
+Both these equations are used to calculate a combined score. This results in equation (3).
+
+$$
+C = \frac{1}{t}\text{Div} + \frac{t=1}{t}\text{Quality}
+$$
 
 ## Results
 
