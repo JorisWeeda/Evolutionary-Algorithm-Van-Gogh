@@ -33,7 +33,7 @@ Improving variation consists of two parts. It starts by comparing common crossov
 ### Common Crossover Methods
 First, we apply a comparison within our EA by using the three most commonly used crossover methods: one-point crossover (*1PX*), two-point crossover (*2PX*), and uniform crossover (*UX*). The performance of these crossover methods is tested against each other using three runs, with the mean fitness and standard deviation per generation shown in Figure 2. Other parameters, such as population size, generations, selection, and initialization methods, remain constant.
 
-![Fitness for three commonly used crossover methods: *1PX*, *2PX*, and *UX*. The bold line represents the mean value of the three different seeds, while the surrounding more transparent color represents the standard deviation from the mean.](./img/img_common_crossover_fitness.png)  
+![Fitness for three commonly used crossover methods: *1PX*, *2PX*, and *UX*. The bold line represents the mean value of the three different seeds, while the surrounding more transparent color represents the standard deviation from the mean.](./res/img_common_crossover_fitness.png)  
 **Figure 2:** Fitness for three commonly used crossover methods: *1PX*, *2PX*, and *UX*. The bold line represents the mean value of the three different seeds, while the surrounding more transparent color represents the standard deviation from the mean.
 
 The figure shows that one-point crossover and two-point crossover exhibit similar convergence rates and fitness scores per generation. However, uniform crossover consistently performs better, apart from similar results in the first ±100 generations. Overall, this crossover method shows faster convergence and a higher fitness score.
@@ -43,7 +43,7 @@ To improve variation more effectively, we explore a learning-based approach usin
 
 **Hypothesis:** We expect that a learning-based approach would identify the individual blocks consisting of a coordinate and a color, leading to improved crossover performance compared to *1PX*, *2PX*, and *UX*.
 
-![RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask \( \textbf{m} \in \mathbb{B}^N \) is created using the outputs of the RBFN.](./img/img_RBFN_crossover_network.png)  
+![RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask \( \textbf{m} \in \mathbb{B}^N \) is created using the outputs of the RBFN.](./res/img_RBFN_crossover_network.png)  
 **Figure 3:** RBFN crossover [TINOS2020106512](#TINOS2020106512). The recombination mask \( \textbf{m} \in \mathbb{B}^N \) is created using the outputs of the RBFN.
 
 Building upon the work presented by [TINOS2020106512](#TINOS2020106512), we design an artificial neural network to compute the recombination mask for two parents. Specifically, a radial basis function network (RBFN) is trained online using past successful recombination cases during the optimization process performed by the evolutionary algorithm.
@@ -87,35 +87,35 @@ We compared the performance of different selection methods based on average fitn
 ### Gradient-Based Initialization
 We compared the gradient-based initialization method with random initialization. Figures 4 and 5 display the results. The gradient-based initialization did not lead to a significant improvement over random initialization.
 
-![Comparison of Gradient-Based Initialization with Random Initialization](./img/img_gradient.png)  
+![Comparison of Gradient-Based Initialization with Random Initialization](./res/img_gradient.png)  
 **Figure 4:** Comparison of Gradient-Based Initialization with Random Initialization.
 
 Despite expectations, the gradient-based initialization did not significantly improve performance over random initialization. This suggests that placing points in high-gradient areas may not always result in better convergence or fitness.
 
-![Comparison of Initialization Methods with 100 Sampled Points](./img/img_100_pts.png)  
+![Comparison of Initialization Methods with 100 Sampled Points](./res/img_100_pts.png)  
 **Figure 5:** Comparison of initialization methods with 100 sampled points and a population of 100.
 
 ### Sampled Color Initialization
 We tested color sample-based initialization with and without random distribution. The results, shown in Figures 6 and 7, indicate that this method is effective at higher resolutions but shows limitations at lower resolutions.
 
-![Comparison of Initialization Methods with 1000 Points](./img/img_1000_pts_with_1000_pop.png)  
+![Comparison of Initialization Methods with 1000 Points](./res/img_1000_pts_with_1000_pop.png)  
 **Figure 6:** Comparison of initialization methods with 1000 sampled points and a population of 1000.
 
-![Evolution Progress for 1000 Points](./img/img_progress_1000_pts.png)  
+![Evolution Progress for 1000 Points](./res/img_progress_1000_pts.png)  
 **Figure 7:** Evolution progress for 1000 points and population size 1000.
 
 ### Variation
 The RBFN approach consistently performed better than *1PX* and *2PX*, aligning closely with *UX*.
 
-![Comparison of Fitness Scores Among Crossover Methods](./img/img_result_crossover.png)  
+![Comparison of Fitness Scores Among Crossover Methods](./res/img_result_crossover.png)  
 **Figure 8:** Comparison of fitness scores among crossover methods, including sRBFNX.
 
 The RBFN method exhibited a constant loss curve, suggesting challenges in adapting to expanding data points. This indicates that the radial basis units might need to be increased to handle data effectively.
 
-![Average Loss of RBFN](./img/img_result_loss.png)  
+![Average Loss of RBFN](./res/img_result_loss.png)  
 **Figure 9:** Average loss of RBFN over 500 generations for three runs.
 
-![Evolution Elapsed Time](./img/img_result_time.png)  
+![Evolution Elapsed Time](./res/img_result_time.png)  
 **Figure 10:** Evolution elapsed time after 500 generations for three runs.
 
 ### Selection
@@ -136,7 +136,7 @@ We can also conclude from the graph that tournament selection lies within the ra
 
 Additionally, the quality difference between TOS and OPT is minimal, which suggests that the benefits from the OPT method are not significant enough to justify the additional computation time. Finally, the diversity of the OPT method is extremely small, indicating a very monotone population which might be detrimental for future improvements to the algorithm due to the lack of gene variation.
 
-![Performance results of tournament selection and optimization selection.](./img/img_selection_graph.png)
+![Performance results of tournament selection and optimization selection.](./res/img_selection_graph.png)
 **Figure 11:** Performance results of tournament selection and optimization selection.
 
 # Conclusion
