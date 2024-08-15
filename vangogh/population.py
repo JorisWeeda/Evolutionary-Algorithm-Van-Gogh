@@ -2,14 +2,32 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 from vangogh.util import REFERENCE_IMAGE
+from typing import List, Tuple
 
 class Population:
-    def __init__(self, population_size, genotype_length, initialization):
+    def __init__(self, population_size: int, genotype_length: int, initialization: str):
+        """
+        Initialize the Population instance.
+
+        Parameters:
+        - population_size (int): The size of the population.
+        - genotype_length (int): The length of each genotype.
+        - initialization (str): Method for initializing the population. 
+        """
         self.genes = np.empty(shape=(population_size, genotype_length), dtype=int)
         self.fitnesses = np.zeros(shape=(population_size,))
         self.initialization = initialization
 
-    def initialize(self, feature_intervals):
+    def initialize(self, feature_intervals: List[Tuple[int, int]]) -> np.ndarray:
+        """
+        Initialize the population based on the specified method.
+
+        Parameters:
+        - feature_intervals (List[Tuple[int, int]]): List of tuples defining the range for each feature.
+
+        Returns:
+        - np.ndarray: The initialized points.
+        """
         n = self.genes.shape[0]
         l = self.genes.shape[1]
         points = []
@@ -27,7 +45,7 @@ class Population:
             num_cells_y = image_array.shape[0] // cell_size_y
 
             # Function to calculate the gradient of an image cell
-            def calculate_gradients(cell):
+            def calculate_gradients(cell: np.ndarray) -> float:
                 gy, gx = np.gradient(cell)
                 magnitude = np.sqrt(gx**2 + gy**2)
                 return np.mean(magnitude)
@@ -80,27 +98,56 @@ class Population:
             points = np.array(points).reshape((n, l))
 
         else:
-            raise Exception("Unknown initialization method")
+            raise ValueError("Unknown initialization method")
 
         return points
     
-    def stack(self, other):
+    def stack(self, other: 'Population') -> None:
+        """
+        Stack the genes and fitnesses of another population onto this one.
+
+        Parameters:
+        - other (Population): The population to stack onto this one.
+        """
         self.genes = np.vstack((self.genes, other.genes))
         self.fitnesses = np.concatenate((self.fitnesses, other.fitnesses))
 
-    def shuffle(self):
+    def shuffle(self) -> None:
+        """
+        Shuffle the genes and fitnesses of the population.
+        """
         random_order = np.random.permutation(self.genes.shape[0])
         self.genes = self.genes[random_order, :]
         self.fitnesses = self.fitnesses[random_order]
 
-    def is_converged(self):
+    def is_converged(self) -> bool:
+        """
+        Check if the population has converged.
+
+        Returns:
+        - bool: True if converged, False otherwise.
+        """
         return len(np.unique(self.genes, axis=0)) < 2
 
-    def delete(self, indices):
+    def delete(self, indices: np.ndarray) -> None:
+        """
+        Delete individuals from the population based on indices.
+
+        Parameters:
+        - indices (np.ndarray): The indices of individuals to delete.
+        """
         self.genes = np.delete(self.genes, indices, axis=0)
         self.fitnesses = np.delete(self.fitnesses, indices)
 
-def plot_initialization_points(reference_image, random_points, random_gradient_points):
+def plot_initialization_points(reference_image: Image, random_points: np.ndarray, random_gradient_points: np.ndarray) -> None:
+    """
+    Plot the initialization points on the reference image.
+
+    Parameters:
+    - reference_image (Image): The reference image to plot on.
+    - random_points (np.ndarray): Points initialized randomly.
+    - random_gradient_points (np.ndarray): Points initialized using gradient information.
+    """
     print("Plotting the points...")
 
     plt.figure(figsize=(12, 6))
@@ -129,6 +176,7 @@ population_size = 100
 genotype_length = 2
 feature_intervals = [(0, REFERENCE_IMAGE.width), (0, REFERENCE_IMAGE.height)]
 
+# Initialize populations
 random_population = Population(population_size, genotype_length, "RANDOM")
 random_points = random_population.initialize(feature_intervals)
 
@@ -138,4 +186,5 @@ random_gradient_points = random_gradient_population.initialize(feature_intervals
 print("Random points initialized:", random_points)
 print("Random gradient points initialized:", random_gradient_points)
 
+# Plot points
 plot_initialization_points(REFERENCE_IMAGE, random_points, random_gradient_points)
