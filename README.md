@@ -150,7 +150,7 @@ Table 1 summarizes the results for the different selection methods. Optimization
 
 **Table 1:** Selection results.
 
-We want to minimize the fitness. This means that when we look at the average fitness and the best fitness in Table \ref{Tab:selection}, the optimization selection method is the best method. However, the difference between tournament selection and the optimization selection is not significant. This is caused by the fact that 98% of the time the optimized selection method picks tournament selection. Because the other selection methods perform significantly worse than TOS and OPT, only the latter two are plotted in the graph in Figure \ref{fig:selection_graph} to show the convergence rate of these methods. 
+We want to minimize the fitness. This means that when we look at the average fitness and the best fitness in Table 1, the optimization selection method is the best method. However, the difference between tournament selection and the optimization selection is not significant. This is caused by the fact that 98% of the time the optimized selection method picks tournament selection. Because the other selection methods perform significantly worse than TOS and OPT, only the latter two are plotted in the graph in Figure 11 to show the convergence rate of these methods. 
 
 We can also conclude from the graph that tournament selection lies within the range of optimization selection, meaning that it might be computationally more viable to use tournament selection as the optimization selection takes about 15% more computation time, and the difference in fitness is minimal. When the population becomes larger, the difference in computation time will be significantly higher. 
 
